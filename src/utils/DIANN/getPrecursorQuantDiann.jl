@@ -3,7 +3,7 @@ function filterRowsOnSequenceLength!(
     min_seq_length::Int64,
     max_seq_length::Int64)
     protein_group_df[!,:SequenceLength] = length.(protein_group_df[!,:StrippedSequence])
-    filter!(x->(x.SequenceLength>min_seq_length)&(x.SequenceLength<max_seq_length), protein_group_df)
+    filter!(x->(x.SequenceLength>=min_seq_length)&(x.SequenceLength<=max_seq_length), protein_group_df)
     return nothing
 end
 
