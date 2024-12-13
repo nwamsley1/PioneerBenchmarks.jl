@@ -48,8 +48,8 @@ function LoadDiannResults(
     diann_results_path::String,
     fasta_dir::String,
     run_to_condition::Dict{String, String},
-    condition_to_experiment::Dict{String, String}
-)
+    condition_to_experiment::Dict{String, String})
+
     _, extension = splitext(diann_results_path)
     if extension != ".parquet"
         throw("DIANN results path should have .parquet extention. Path supplied was: $diann_results_path")
@@ -76,6 +76,32 @@ function LoadDiannResults(
 
     columns_order = [
     :Run,:Condition,:Experiment,:Species,
+    :PrecursorId,:ModifiedSequence,:StrippedSequence,:PrecursorCharge,:PrecursorQuantity,:PrecursorNormalised,:QValue,
+    :ProteinIds,:ProteinGroup,:ProteinNames,:PGNormalised,:PGMaxLFQ,:PGQValue]
+
+    return diann_r[!,columns_order]
+end
+
+function LoadDiannResultsMMCC(
+    diann_results_path::String,
+    run_to_condition::Dict{String, String})
+    
+    _, extension = splitext(diann_results_path)
+    if extension != ".parquet"
+        throw("DIANN results path should have .parquet extention. Path supplied was: $diann_results_path")
+    end
+    println("Loading DIANN Results DF...")
+    @time begin
+        ds = Dataset(diann_results_path)
+        diann_r = DataFrame(ds; copycols=true);
+    end
+    println("Checking and filtering columns...")
+    diann_r = checkAndFilterDiannColumns(diann_r)
+    println("Getting Accesion ID to Species Map From Fastas...")
+    diann_r[!,:Condition] = map(x->getCondition(x, run_to_condition), diann_r[!,:Run])
+
+    columns_order = [
+    :Run,:Condition,
     :PrecursorId,:ModifiedSequence,:StrippedSequence,:PrecursorCharge,:PrecursorQuantity,:PrecursorNormalised,:QValue,
     :ProteinIds,:ProteinGroup,:ProteinNames,:PGNormalised,:PGMaxLFQ,:PGQValue]
 

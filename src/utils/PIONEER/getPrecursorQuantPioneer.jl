@@ -11,15 +11,14 @@ end
 
 function getPrecursorQuantPioneer(
     pioneer_results_dir::String,
+    run_to_condition::Dict{String, String},
     condition_to_experiment::Dict{String, String};
     forbidden_mods::Vector{String} = ["UNIMOD:35"]
 )
     #Load dataframe
-    pioneer_pr = DataFrame(Tables.columnTable(Arrow.Table(
+    pioneer_pr = DataFrame(Tables.columntable(Arrow.Table(
         joinpath(
                 pioneer_results_dir, 
-                "RESULTS",
-                "RESULTS",
                 "precursors_long.arrow"
                  )
     )))
@@ -40,9 +39,9 @@ function getPrecursorQuantPioneer(
     #Standardize column names 
     select!(pioneer_pr, [:file_name,:species,:modified_sequence,:peak_area])
     rename!(pioneer_pr, [:file_name,:species,:modified_sequence,:peak_area] .=> [:Run, :Species, :PrecursorId,:PrecursorQuantity])
-
     #Parse file names to get the condition and experimemnt for each precursor id 
-    pioneer_pr[!,:Condition] = first.(split.(pioneer_pr[!,:Run],'_'))
+    println("run_to_condition $run_to_condition")
+    pioneer_pr[!,:Condition] = [run_to_condition[run_name] for run_name in pioneer_pr[!,:Run]]
     pioneer_pr[!,:Experiment] = [condition_to_experiment[condition] for condition in pioneer_pr[!,:Condition]]
     #QValue already filtered at 1% by Pioneer. Add columns to harmonize with diann output 
     pioneer_pr[!,:QValue] .= zero(Float32)

@@ -1,257 +1,244 @@
-
-
-
-test_template = first(getPrecursorQuantDIANN(diann_r), 4)
-
-out_dir = "/Users/n.t.wamsley/Desktop/PIONEER_AltimeterOlsenExploris200ng_M0M1M2"
-if !isdir(out_dir)
-    mkdir(out_dir)
-end
-if !isdir(joinpath(out_dir, "plots"))
-    mkdir(joinpath(out_dir, "plots"))
-end
-if !isdir(joinpath(out_dir, "tables"))
-    mkdir(joinpath(out_dir, "tables"))
-end
-if !isdir(joinpath(out_dir, "stats"))
-    mkdir(joinpath(out_dir, "stats"))
-end
-
-
-##########
-#Format pioneer precursors 
-pioneer_pr = DataFrame(Tables.columntable(Arrow.Table("/Users/n.t.wamsley/Desktop/ALTIMETER_PIONEER_101624/OlsenMixedSpeciesExploris500ng_M0M1M2/RESULTS/RESULTS/precursors_long.arrow")))
-cols_to_keep = [
-    :file_name, :species, :sequence, :structural_mods, 
-    :charge, :peak_area
-]
-pioneer_pr = pioneer_pr[!,cols_to_keep]
-pioneer_pr[!,:modified_sequence] = getModifiedSequence.(pioneer_pr[!,:sequence], "", pioneer_pr[!,:structural_mods])
-pioneer_pr[!,:modified_sequence]  = pioneer_pr[!,:modified_sequence].*string.(pioneer_pr[!,:charge])
-pioneer_pr = pioneer_pr[!,[:file_name,:species,:modified_sequence,:peak_area]]
-rename!(pioneer_pr, [:file_name,:species,:modified_sequence,:peak_area] .=> [:Run, :Species, :PrecursorId,:PrecursorQuantity])
-pioneer_pr[!,:Condition] = first.(split.(pioneer_pr[!,:Run],'_'))
-pioneer_pr[!,:Experiment] = [condition_to_experiment[condition] for condition in pioneer_pr[!,:Condition]]
-pioneer_pr[!,:QValue] .= zero(Float32)
-pioneer_pr = pioneer_pr[!,[:Run,:Condition,:Experiment,:Species,:PrecursorId,:PrecursorQuantity,:QValue]]
-filter!(x->!ismissing(x.PrecursorQuantity), pioneer_pr)
-pioneer_pr[!,:PrecursorQuantity]= Float32.(pioneer_pr[!,:PrecursorQuantity])
-pioneer_pr[!,:Condition] = string.(pioneer_pr[!,:Condition])
-filter!(x->x.Run!="E5H50Y45_3",pioneer_pr)
-filter!(x->!occursin("UNIMOD:35", x.PrecursorId),  pioneer_pr)
-
-
-pr_condition_summary = combine(
-    condition->summarizePrecursorCondition(condition),    
-    groupby(pioneer_pr,[:Experiment,:Condition,:Species,:PrecursorId])
-);
-species_order = Dict("HUMAN" => 1, "YEAST" => 2, "ECOLI" => 3)
-# Sort the DataFrame using the custom order
-sort!(pr_condition_summary, :Species, by = x -> species_order[x])
-precursor_group_stats = combine(groupby(pr_condition_summary,:Experiment)) do experiment_df
-    summarizeExperiment(
-            out_dir,
-            "precursors",
-            true,
-            experiment_df.Experiment[1], 
-            experiment_df,
-            [:Species,:PrecursorId],
-            experiment_to_species_ratios,
-            min_n = UInt8(3)
-            )
-end
-sort!(precursor_group_stats,[:Experiment,:Species])
-CSV.write(joinpath(out_dir, "stats", "precursors_stats.csv"), protein_group_stats)
-
-
-##########
-#Format pioneer protein groups 
-
-pioneer_pg = DataFrame(Tables.columntable(Arrow.Table("/Users/n.t.wamsley/Desktop/ALTIMETER_PIONEER_101624/OlsenMixedSpeciesExploris500ng_M0M1M2/RESULTS/RESULTS/protein_groups_long.arrow")));
-filter!(x->x.target, pioneer_pg)
-filter!(x->x.n_peptides>=2, pioneer_pg)
-cols_to_keep = [
-    :file_name, :species, :protein, :abundance
-]
-pioneer_pg = pioneer_pg[!,cols_to_keep]
-rename!(pioneer_pg, [:file_name,:species,:protein,:abundance] .=> [:Run, :Species, :ProteinGroup, :PGMaxLFQ])
-pioneer_pg[!,:Condition] = first.(split.(pioneer_pg[!,:Run],'_'))
-pioneer_pg[!,:Experiment] = [condition_to_experiment[condition] for condition in pioneer_pg[!,:Condition]]
-pioneer_pg[!,:PGQValue] .= zero(Float32)
-filter!(x->x.Run!="E5H50Y45_3",pioneer_pg)
-
-
-pg_condition_summary = combine(
-    condition->summarizeProteinGroupCondition(condition),    
-    groupby(pioneer_pg,[:Experiment,:Condition,:Species,:ProteinGroup])
-);
-pg_condition_summary[!,:Condition] = string.(pg_condition_summary[!,:Condition])
-species_order = Dict("HUMAN" => 1, "YEAST" => 2, "ECOLI" => 3)
-# Sort the DataFrame using the custom order
-sort!(pg_condition_summary, :Species, by = x -> species_order[x])
-protein_group_stats = combine(groupby(pg_condition_summary,:Experiment)) do experiment_df
-    summarizeExperiment(
-            out_dir,
-            "protein_groups",
-            false,
-            experiment_df.Experiment[1], 
-            experiment_df,
-            [:Species,:ProteinGroup],
-            experiment_to_species_ratios,
-            min_n = UInt8(3)
-            )
-end
-sort!(protein_group_stats,[:Experiment,:Species])
-CSV.write(joinpath(out_dir, "stats", "protein_groups_stats.csv"), protein_group_stats)
-
-
-#diann_results_path = "/Users/n.t.wamsley/Desktop/DIANN_ASTRAL/OlsenMixedSpeciesAstral200ngNonNormReport.parquet"
 diann_results_path = "/Users/n.t.wamsley/Desktop/DIANN_EXPLORIS/OlsenMixedSpeciesExploris500ngReportNoNorm.parquet"
 fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/SPEC_LIBS/FASTA/"
-run_to_condition =  Dict(
-    "20230324_OLEP08_200ng_30min_E10H50Y40_180K_2Th3p5ms_01.mzML" => "E10H50Y40",
-    "20230324_OLEP08_200ng_30min_E10H50Y40_180K_2Th3p5ms_02.mzML" => "E10H50Y40",
-    "20230324_OLEP08_200ng_30min_E10H50Y40_180K_2Th3p5ms_03.mzML" => "E10H50Y40",
-    "20230324_OLEP08_200ng_30min_E20H50Y30_180K_2Th3p5ms_01.mzML" => "E20H50Y30",
-    "20230324_OLEP08_200ng_30min_E20H50Y30_180K_2Th3p5ms_02.mzML" => "E20H50Y30",
-    "20230324_OLEP08_200ng_30min_E20H50Y30_180K_2Th3p5ms_03.mzML" => "E20H50Y30",
-    "20230324_OLEP08_200ng_30min_E30H50Y20_180K_2Th3p5ms_01.mzML" => "E30H50Y20",
-    "20230324_OLEP08_200ng_30min_E30H50Y20_180K_2Th3p5ms_02.mzML" => "E30H50Y20",
-    "20230324_OLEP08_200ng_30min_E30H50Y20_180K_2Th3p5ms_03.mzML" => "E30H50Y20",
-    "20230324_OLEP08_200ng_30min_E40H50Y10_180K_2Th3p5ms_01.mzML" => "E40H50Y10",
-    "20230324_OLEP08_200ng_30min_E40H50Y10_180K_2Th3p5ms_02.mzML" => "E40H50Y10",
-    "20230324_OLEP08_200ng_30min_E40H50Y10_180K_2Th3p5ms_03.mzML" => "E40H50Y10",
-    "20230324_OLEP08_200ng_30min_E45H50Y5_180K_2Th3p5ms_01.mzML" => "E45H50Y5",
-    "20230324_OLEP08_200ng_30min_E45H50Y5_180K_2Th3p5ms_02.mzML" => "E45H50Y5",
-    "20230324_OLEP08_200ng_30min_E45H50Y5_180K_2Th3p5ms_03.mzML" => "E45H50Y5",
-    "20230324_OLEP08_200ng_30min_E5H50Y45_180K_2Th3p5ms_01.mzML" => "E5H50Y45",
-    "20230324_OLEP08_200ng_30min_E5H50Y45_180K_2Th3p5ms_02.mzML" => "E5H50Y45",
-    "20230324_OLEP08_200ng_30min_E5H50Y45_180K_2Th3p5ms_03.mzML" => "E5H50Y45"
-)
-
-run_to_condition =  Dict(
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E10H50Y40_30SPD_DIA_1.raw" => "E10H50Y40",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E10H50Y40_30SPD_DIA_2.raw" => "E10H50Y40",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E10H50Y40_30SPD_DIA_3.raw" => "E10H50Y40",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E10H50Y40_30SPD_DIA_4.raw" => "E10H50Y40",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E20H50Y30_30SPD_DIA_1.raw" => "E20H50Y30",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E20H50Y30_30SPD_DIA_2.raw" => "E20H50Y30",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E20H50Y30_30SPD_DIA_3.raw" => "E20H50Y30",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E20H50Y30_30SPD_DIA_4.raw" => "E20H50Y30",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E30H50Y20_30SPD_DIA_1.raw" => "E30H50Y20",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E30H50Y20_30SPD_DIA_2.raw" => "E30H50Y20",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E30H50Y20_30SPD_DIA_3.raw" => "E30H50Y20",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E30H50Y20_30SPD_DIA_4.raw" => "E30H50Y20",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E40H50Y10_30SPD_DIA_1.raw" => "E40H50Y10",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E40H50Y10_30SPD_DIA_2.raw" => "E40H50Y10",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E40H50Y10_30SPD_DIA_3.raw" => "E40H50Y10",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E40H50Y10_30SPD_DIA_4.raw" => "E40H50Y10",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E45H50Y5_30SPD_DIA_1.raw" => "E45H50Y5",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E45H50Y5_30SPD_DIA_2.raw" => "E45H50Y5",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E45H50Y5_30SPD_DIA_3.raw" => "E45H50Y5",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E45H50Y5_30SPD_DIA_4.raw" => "E45H50Y5",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E5H50Y45_30SPD_DIA_1.raw" => "E5H50Y45",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E5H50Y45_30SPD_DIA_2.raw" => "E5H50Y45",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E5H50Y45_30SPD_DIA_3.raw" => "E5H50Y45",
-    "20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E5H50Y45_30SPD_DIA_4.raw" => "E5H50Y45",
-)
-
-
 key_file_path = "/Users/n.t.wamsley/Desktop/astral_test_key_080324.txt"
-condition_to_experiment, experiment_to_species_ratios = conditionToExperiment(key_file_path)
-
-diann_r = LoadDiannResults(
+run_to_condition_path = "/Users/n.t.wamsley/Projects/PioneerBenchmarks/data/example_run_to_condition.tsv"
+threeProteomeAnalysis(
     diann_results_path,
     fasta_dir,
-    run_to_condition,
-    condition_to_experiment
+    run_to_condition_path,
+    key_file_path,
+    "diann",
+    "/Users/n.t.wamsley/Desktop/PioneerBenchmarksTest"
 )
-filter!(x->x["Run"]!="20220909_EXPL8_Evo5_ZY_MixedSpecies_500ng_E5H50Y45_30SPD_DIA_3.raw",diann_r)
+
+pioneer_results_path = "/Users/n.t.wamsley/Desktop/AstralAltimeter_101624_M0M1/"
+fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/SPEC_LIBS/FASTA/"
+run_to_condition_path = "/Users/n.t.wamsley/Projects/PioneerBenchmarks/data/example_run_to_condition_pioneer.csv"
+key_file_path = "/Users/n.t.wamsley/Desktop/astral_test_key_080324.txt"
+threeProteomeAnalysis(
+    pioneer_results_path,
+    fasta_dir,
+    run_to_condition_path,
+    key_file_path,
+    "pioneer",
+    "/Users/n.t.wamsley/Desktop/PioneerBenchmarksTest2"
+)
 
 
-out_dir = "/Users/n.t.wamsley/Desktop/DIANN_OlsenExploris200ng"
-if !isdir(out_dir)
-    mkdir(out_dir)
-end
-if !isdir(joinpath(out_dir, "plots"))
-    mkdir(joinpath(out_dir, "plots"))
-end
-if !isdir(joinpath(out_dir, "tables"))
-    mkdir(joinpath(out_dir, "tables"))
-end
-if !isdir(joinpath(out_dir, "stats"))
-    mkdir(joinpath(out_dir, "stats"))
-end
 
-
-pg_condition_summary = combine(
-    condition->summarizeProteinGroupCondition(condition),    
-    groupby(getProteinQuantDIANN(diann_r),[:Experiment,:Condition,:Species,:ProteinGroup])
-);
-
-protein_group_stats = combine(groupby(pg_condition_summary,:Experiment)) do experiment_df
-    summarizeExperiment(
-            out_dir,
-            "protein_groups",
-            false,
-            experiment_df.Experiment[1], 
-            experiment_df,
-            [:Species,:ProteinGroup],
-            experiment_to_species_ratios,
-            min_n = UInt8(3)
-            )
-end
-sort!(protein_group_stats,[:Experiment,:Species])
-CSV.write(joinpath(out_dir, "stats", "protein_groups_stats.csv"), protein_group_stats)
-#filter!(x->x.n>2, pg_condition_summary);
-
-pr_condition_summary = combine(
-    condition->summarizePrecursorCondition(condition),    
-    groupby(getPrecursorQuantDIANN(diann_r),[:Experiment,:Condition,:Species,:PrecursorId])
-);
-#filter!(x->x.n>2, pr_condition_summary);
-
-#for (key, experiment_df) in pairs(groupby(pr_condition_summary,:Experiment))
-precursor_group_stats = combine(groupby(pr_condition_summary,:Experiment)) do experiment_df
-    summarizeExperiment(
-            out_dir,
-            "precursors",
-            true,
-            experiment_df.Experiment[1], 
-            experiment_df,
-            [:Species,:PrecursorId],
-            experiment_to_species_ratios,
-            min_n = UInt8(3)
-            )
-end
-sort!(precursor_group_stats,[:Experiment,:Species])
-CSV.write(joinpath(out_dir, "stats", "precursors_stats.csv"), protein_group_stats)
-
-pr_experiments = groupby(getPrecursorQuantDIANN(testdf),:Experiment)
-
-
-test_exp_summary = summarizeExperiment(
-    "E5H50Y45_vs_E45H50Y5", 
-    test_experiment,
-    min_n = UInt8(3),
-    [:Species,:PrecursorId],
+conditions = ["A","B","C","D","E","F","G","H","I","J","K"]
+fractions = Float64[0, 0.5, 1, 3, 5, 7, 10, 30, 50, 70, 100]
+cond_to_fraction = Dict(
+    zip(
+        conditions,fractions
     )
+)
 
-    test_exp_summary = summarizeExperiment(
-        "E10H50Y40_vs_E40H50Y10", 
-        groupby(pg_condition_summary,:Experiment)[1],
-        [:Species,:ProteinGroup],
-        experiment_to_species_ratios,
-        min_n = UInt8(3)
+function create_12_ranges(N::Int)
+    # Calculate size of each chunk (rounded up to include all elements)
+    chunk_size = ceil(Int, N/12)
+    
+    # Create the ranges
+    ranges = [((i-1)*chunk_size + 1):min(i*chunk_size, N) for i in 1:12]
+    
+    return ranges
+end
+
+using StatsBase, Distributions, LinearAlgebra, StaticArrays, DataFrames, Polynomials, ProgressBars
+protein_groups_table, precursors_table = mmccAnalysis()
+
+
+precursors_table[!,:PrecursorQuantity] = Float64.( precursors_table[!,:PrecursorQuantity])
+precursors_table[!,:percent_light] = [Float64(cond_to_fraction[x]) for x in  precursors_table[!,:Condition]]
+sort!( precursors_table, [:PrecursorId,:Condition])
+precursors_table_grouped = groupby( precursors_table, :PrecursorId)
+include("src/utils/MMCC_UTILS/uniformBspline.jl")
+include("src/utils/MMCC_UTILS/bootstrapMMCC.jl")
+
+
+ranges = create_12_ranges(length(precursors_table_grouped))
+test_vecs = Vector{Any}(undef, 12)
+@time begin
+Threads.@threads for (idx, gdf_range) in collect(enumerate(ranges))
+    test_vecs[idx] = BootstrapGDF(precursors_table_grouped[gdf_range], 
+    :PrecursorQuantity, 
+    power = 0.5,
+    n_bootstraps = 1000,
+    n_xbins = 100)
+end
+end
+curves = vcat(test_vecs...)
+filter!(x->coalesce(x.lloq, typemax(Float32))<99.0, curves)
+
+
+protein_groups_table[!,:PGMaxLFQ] = Float64.( protein_groups_table[!,:PGMaxLFQ])
+protein_groups_table[!,:percent_light] = [Float64(cond_to_fraction[x]) for x in  protein_groups_table[!,:Condition]]
+sort!(protein_groups_table, [:ProteinIds,:Condition])
+protein_groups_table_grouped = groupby(protein_groups_table, :ProteinIds)
+
+lloq_curves_pg = analyzeMMCC(
+    protein_groups_table,
+    :ProteinIds,
+    :PGMaxLFQ
+)
+
+
+ranges = create_12_ranges(length(protein_groups_table_grouped))
+test_vecs = Vector{Any}(undef, 12)
+@time begin
+Threads.@threads for (idx, gdf_range) in collect(enumerate(ranges))
+    test_vecs[idx] = BootstrapGDF(protein_groups_table_grouped[gdf_range], 
+    :ProteinIds,
+    :PGMaxLFQ, 
+    power = 0.5,
+    n_bootstraps = 1000,
+    n_xbins = 100)
+end
+end
+curves = vcat(test_vecs...)
+filter!(x->coalesce(x.lloq, typemax(Float32))<99.0, curves)
+
+histogram(collect(skipmissing(curves[!,:lloq])))
+histogram(collect(skipmissing(curves[!,:aic_mean])))
+histogram(collect(skipmissing(curves[!,:mean_intercept]))./(collect(skipmissing(curves[!,:max_at_100]))), bins = LinRange(-0.3, 0.3, 25))
+
+
+protein_groups_table = getProteinQuantDIANN(diann_r)
+Threads.@threads for (idx, gdf_range) in collect(enumerate(ranges))
+    println("urmom")
+end
+
+include("src/utils/MMCC_UTILS/bootstrapMMCC.jl")
+test_ = BootstrapGDF(testdf2_grouped[1:100], 
+:PrecursorQuantity, 
+power = 0.5,
+n_bootstraps = 1000,
+n_xbins = 100)
+
+cond_to_fraction = Dict(
+    zip(
+        ["A","B","C","D","E","F","G","H","I","J","K"],
+        Float32[0, 0, 0.25, 0.5, 1, 5, 10, 25, 50, 70, 100 ]
+    )
+)
+test_example = copy(testdf2_grouped[100])
+test_example[!,:percent_light] = [cond_to_fraction[x] for x in test_example[!,:Condition]]
+
+include("src/utils/MMCC_UTILS/uniformBspline.jl")
+X = UniformSplineDMAT(
+    test_example[!,:percent_light],
+    3,
+    3
+)
+b = X[:,1:5]\test_example[!,:PrecursorQuantity]
+
+y_fit = X[:,1:5]*b
+
+plot( test_example[!,:percent_light], test_example[!,:PrecursorQuantity], seriestype=:scatter)
+
+tspline = UniformSpline(
+    test_example[!,:PrecursorQuantity],
+    test_example[!,:percent_light],
+    3,
+    3
+)
+
+plot!( LinRange(0, 100, 1000), tspline.(LinRange(0, 100, 1000)))
+
+gdf = testdf2_grouped
+quant_col = :PrecursorQuantity
+n_bootstraps = 1000
+n_xbins = 100
+xmin = 0
+xmax = 100
+power = 0.59
+min_t = 0.01
+
+
+T = Float64
+curves = [(precursor_idx = UInt32(0),
+           lloq = 0.0,
+           aic_mean = 0.0,
+           mean_intercept = 0.0,
+           intercept_q95 = 0.0,
+           max_at_100 = 0.0) for _ in range(1, length(gdf))]
+
+bootstrap_Y = zeros(T, n_xbins, n_bootstraps);
+bootstrap_intercept = zeros(T, n_bootstraps);
+aic_diffs = zeros(T, n_bootstraps);
+x_bins = collect(LinRange(xmin, xmax, n_xbins));
+w_bins = diag(getWeights(x_bins, power, min_t));
+x_mat_bins_5p = UniformSplineDMAT(x_bins, 3, 3)[:,1:5]
+x_mat_bins_lin = hcat(
+                    ones(T, length(x_bins)),
+                    x_bins
+        )
+
+test_example = copy(gdf[100])
+test_example[!,:percent_light] = [cond_to_fraction[x] for x in test_example[!,:Condition]]
+
+data_x = Float64.(test_example[!,:percent_light])
+#data_y = T.(coalesce.(psms[!,:gmean_area], 0.0))
+data_y = Float64.(test_example[!,quant_col])
+
+
+include("src/utils/MMCC_UTILS/bootstrapMMCC.jl")
+
+i = 1
+for (key, psms) in pairs(gdf)
+    psms = gdf[12]
+    data_x = T.(collect(psms[!,:percent_light]))
+    #data_y = T.(coalesce.(psms[!,:gmean_area], 0.0))
+    data_y = T.(coalesce.(psms[!,quant_col], 0.0))
+BoostrapCalibration!(
+            #zero(UInt32),
+            zero(UInt32),
+            bootstrap_Y,
+            bootstrap_intercept,
+            aic_diffs,
+            data_x,
+            data_y,
+            x_mat_bins_5p,
+            x_mat_bins_lin,
+            w_bins,
+            x_bins,
+            weight_inv_power = power,
+            min_t = min_t,
         )
 
 
-        test_exp_summary = summarizeExperiment(
-            "E20H50Y30_vs_E30H50Y20", 
-            groupby(pg_condition_summary,:Experiment)[2],
-            [:Species,:ProteinGroup],
-            experiment_to_species_ratios,
-            min_n = UInt8(3)
-            )
 
-            
+
+
+diann_results_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/DIANN/THREE_PROTEOME/report.parquet"
+fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/DIANN/THREE_PROTEOME/fasta"
+key_file_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/DIANN/THREE_PROTEOME/key.txt"
+run_to_condition_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/DIANN/THREE_PROTEOME/run_to_condition.txt"
+threeProteomeAnalysis(
+    diann_results_path,
+    fasta_dir,
+    run_to_condition_path,
+    key_file_path,
+    "diann",
+    "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/DIANN/THREE_PROTEOME"
+)
+
+
+
+
+
+
+pioneer_results_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/THREE_PROTEOME_5MIN/SEPERATE_TRACES"
+fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/SPEC_LIBS/FASTA/"
+key_file_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/THREE_PROTEOME_5MIN/SEPERATE_TRACES/key.txt"
+run_to_condition_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/THREE_PROTEOME_5MIN/SEPERATE_TRACES/run_to_condition.txt"
+threeProteomeAnalysis(
+    pioneer_results_path,
+    fasta_dir,
+    run_to_condition_path,
+    key_file_path,
+    "pioneer",
+    "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/THREE_PROTEOME_5MIN/SEPERATE_TRACES/three_proteome"
+)
+
+

@@ -62,10 +62,12 @@ function summarizeExperiment(
     species_ratios = experiment_to_species_ratios[experiment]
     group_a, _, group_b = split(experiment, '_')
     grouped_experiment_df = groupby(experiment_df, groupby_cols)
+    #println([size(x, 1) for x in grouped_experiment_df])
     exp_summary = combine(
         exp_group -> summarizeExperimentGroup(exp_group, group_a, group_b),
         grouped_experiment_df
     )
+    #println("exp_summary $exp_summary")
     filter!(x->coalesce(x.min_n, -1)>=min_n, exp_summary)
     filter!(x->!ismissing(x.p_value), exp_summary)
     exp_summary[!,:p_adj] = adjust(coalesce.(exp_summary[!,:p_value], 1.0f0), BenjaminiHochberg())
@@ -108,6 +110,8 @@ function summarizeExperimentGroup(
     if size(experiment_group, 1) > 2
         throw("Experiment group has more than three entries. Indicates error.")
     end
+
+    try 
     summarizeExperimentGroup(
         experiment_group[!,:Condition],
         cond_a, cond_b,
@@ -117,11 +121,22 @@ function summarizeExperimentGroup(
         experiment_group[!,:n],
         experiment_group[!,:max_qval]
     )
+    catch
+        println("typeof( experiment_group[!,:Condition]): ", typeof( experiment_group[!,:Condition]))
+        println("typeof( experiment_group[!,:mean]): ", typeof(experiment_group[!,:mean]))
+        println("typeof( experiment_group[!,:var]): ", typeof( experiment_group[!,:var]))
+        println("typeof( experiment_group[!,:CV]): ", typeof( experiment_group[!,:CV]))
+        println("typeof( experiment_group[!,:n]): ", typeof( experiment_group[!,:n]))
+        println("typeof( experiment_group[!,:max_qval]): ", typeof( experiment_group[!,:max_qval]))
+        println("cond_a $cond_a cond_b $cond_b")
+
+        throw("darn")
+    end
 end
 
 
 function summarizeExperimentGroup(
-    conditions::AbstractVector{String},
+    conditions::AbstractArray{S},
     cond_a::AbstractString,
     cond_b::AbstractString,
     mean_abundance::AbstractVector{Float32},
@@ -134,7 +149,7 @@ function summarizeExperimentGroup(
               max_cv::Union{Missing, Float32},
               min_n::Union{Missing, UInt8},
               max_qval::Union{Missing, Float32},
-              p_value::Union{Missing, Float32}}
+              p_value::Union{Missing, Float32}} where {S<:AbstractString}
     cond_a = findfirst(x->x==cond_a, conditions)
     cond_b = findfirst(x->x==cond_b, conditions)
     if isnothing(cond_b) | isnothing(cond_a)
