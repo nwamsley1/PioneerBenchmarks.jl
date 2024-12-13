@@ -17,7 +17,7 @@ function getPrecursorsPerProtein!(
     df[!,:to_keep] .= false
     gdf = groupby(df, group_cols)
     for sdf in gdf
-        sdf[1,:n_precursors] = size(sdf, 1)
+        sdf[1,:n_precursors] = length(unique(sdf[!,:StrippedSequence]))#size(sdf, 1)
         sdf[1,:to_keep] = true
     end
     # Get the first row of each group and count the occurrences
@@ -45,7 +45,8 @@ function getProteinQuantDIANN(
         min_seq_length, max_seq_length,
     )
     #Remove length filtering Rows
-    select!(diann_pg, Not([:StrippedSequence,:SequenceLength]))
+    #select!(diann_pg, Not([:StrippedSequence,:SequenceLength]))
+    select!(diann_pg, Not([:SequenceLength]))
     #Remove rows not passing the q-value threshold or with no quantitation
     filter!(x->x.QValue<=max_precursor_q_val, diann_pg)
     filter!(x->!iszero(x.PrecursorQuantity), diann_pg)
@@ -62,7 +63,7 @@ function getProteinQuantDIANN(
 
     #Filter based on protein group q value
     filter!(x->x.PGQValue<=max_pg_q_val, diann_pg)
-
+    #println("TEST")
     #Filter based on presence/absence of protein group quantitation
     filter!(x->!iszero(x.PGMaxLFQ), diann_pg)
 
@@ -88,7 +89,8 @@ function getMMCCProteinQuantDIANN(
         min_seq_length, max_seq_length,
     )
     #Remove length filtering Rows
-    select!(diann_pg, Not([:StrippedSequence,:SequenceLength]))
+    #select!(diann_pg, Not([:StrippedSequence,:SequenceLength]))
+    select!(diann_pg, Not([:SequenceLength]))
     #Remove rows not passing the q-value threshold or with no quantitation
     filter!(x->x.QValue<=max_precursor_q_val, diann_pg)
     filter!(x->!iszero(x.PrecursorQuantity), diann_pg)
@@ -102,8 +104,8 @@ function getMMCCProteinQuantDIANN(
     filter!(x->x.n_precursors>=min_precursors_per_protein, diann_pg)
     #Remove precursor count column 
     select!(diann_pg, Not([:n_precursors]))
-
     #Filter based on protein group q value
+    #println("TEST")
     filter!(x->x.PGQValue<=max_pg_q_val, diann_pg)
 
     #Filter based on presence/absence of protein group quantitation
