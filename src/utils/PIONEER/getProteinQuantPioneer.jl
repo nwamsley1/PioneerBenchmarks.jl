@@ -21,7 +21,17 @@ function getProteinQuantPioneer(
     select!(pioneer_pg, cols_to_keep)
     rename!(pioneer_pg, [:file_name,:species,:protein,:abundance] .=> [:Run, :Species, :ProteinGroup, :PGMaxLFQ])
     pioneer_pg[!,:Condition] = [run_to_condition[run_name] for run_name in pioneer_pg[!,:Run]]
-    pioneer_pg[!,:Experiment] = [condition_to_experiment[condition] for condition in pioneer_pg[!,:Condition]]
+
+    pioneer_pg[!,:Experiment] .= ""
+    for i in range(1, size(pioneer_pg, 1))
+        if haskey(condition_to_experiment, pioneer_pg[i,:Condition])
+            exp = condition_to_experiment[pioneer_pg[i,:Condition]]
+            pioneer_pg[i,:Experiment] = exp
+        end
+    end
+    filter!(x->x.Experiment.!="", pioneer_pg)
+
+    #pioneer_pg[!,:Experiment] = [condition_to_experiment[condition] for condition in pioneer_pg[!,:Condition]]
     pioneer_pg[!,:PGQValue] .= zero(Float32)
     #filter!(x->x.Run!="E5H50Y45_3",pioneer_pg)
     return pioneer_pg

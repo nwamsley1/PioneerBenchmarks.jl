@@ -242,3 +242,46 @@ threeProteomeAnalysis(
 )
 
 
+
+pioneer_results_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/THREE_PROTEOME_5MIN/COMBINE_TRACES/"
+fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/SPEC_LIBS/FASTA/"
+key_file_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/THREE_PROTEOME_5MIN/COMBINE_TRACES/key.txt"
+run_to_condition_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/THREE_PROTEOME_5MIN/COMBINE_TRACES/run_to_condition.txt"
+threeProteomeAnalysis(
+    pioneer_results_path,
+    fasta_dir,
+    run_to_condition_path,
+    key_file_path,
+    "pioneer",
+    "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/ASTRAL_MTAC/THREE_PROTEOME_5MIN/COMBINE_TRACES/three_proteome"
+)
+
+
+
+pioneer_results_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/OlsenMixedSpeciesAstral200ng/SEPERATE_TRACES/"
+fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/SPEC_LIBS/FASTA/"
+key_file_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/OlsenMixedSpeciesAstral200ng/SEPERATE_TRACES/key.txt"
+run_to_condition_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/OlsenMixedSpeciesAstral200ng/SEPERATE_TRACES/run_to_condition.txt"
+threeProteomeAnalysis(
+    pioneer_results_path,
+    fasta_dir,
+    run_to_condition_path,
+    key_file_path,
+    "pioneer",
+    "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/DATASETS_ARROW/OlsenMixedSpeciesAstral200ng/SEPERATE_TRACES/three_proteome"
+)
+
+
+
+pioneer_results_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/PIONEER_ANALYSES/Jan01_2025_SEARCH_NoQuadFit"
+fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/SPEC_LIBS/FASTA/"
+key_file_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/PIONEER_ANALYSES/Jan01_2025_SEARCH_NoQuadFit/key.txt"
+run_to_condition_path = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/PIONEER_ANALYSES/Jan01_2025_SEARCH_NoQuadFit/run_to_condition.txt"
+threeProteomeAnalysis(
+    pioneer_results_path,
+    fasta_dir,
+    run_to_condition_path,
+    key_file_path,
+    "pioneer",
+    "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/PIONEER_ANALYSES/Jan01_2025_SEARCH_NoQuadFit/three_proteome"
+)

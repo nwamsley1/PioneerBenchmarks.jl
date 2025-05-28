@@ -76,9 +76,15 @@ function threeProteomeAnalysis(
         groupby(precursors_table,[:Experiment,:Condition,:Species,:PrecursorId])
     );
     species_order = Dict("HUMAN" => 1, "YEAST" => 2, "ECOLI" => 3)
+    println("head pr_condition_summary: ", first(pr_condition_summary, 5))
+    return
     # Sort the DataFrame using the custom order
     sort!(pr_condition_summary, :Species, by = x -> species_order[x])
+    println("AA")
+    println("A")
+    CSV.write("/Users/n.t.wamsley/Desktop/pr_condition.csv", pr_condition_summary)
     precursor_group_stats = combine(groupby(pr_condition_summary,:Experiment)) do experiment_df
+        println("size(experiment_df) ", size(experiment_df))
         summarizeExperiment(
                 out_dir,
                 "precursors",
@@ -95,6 +101,8 @@ function threeProteomeAnalysis(
 
     ##########
     #Protein Groups Summary
+    CSV.write(joinpath(out_dir, "stats", "protein_groups_table.csv"), protein_groups_table)
+
     pg_condition_summary = combine(
         condition->summarizeProteinGroupCondition(condition),    
         groupby(protein_groups_table,[:Experiment,:Condition,:Species,:ProteinGroup])

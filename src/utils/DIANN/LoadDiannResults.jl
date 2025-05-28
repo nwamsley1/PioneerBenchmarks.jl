@@ -40,7 +40,11 @@ end
 function getExperiment(
     condition::String,
     condition_to_experiment::Dict{String, String})
-    return condition_to_experiment[condition]
+    if haskey(condition_to_experiment, condition)
+        return condition_to_experiment[condition]
+    else
+        return ""
+    end
 end
 
 
@@ -72,7 +76,14 @@ function LoadDiannResults(
     #Get the species to which each entry belongs 
     diann_r[!,:Species] = map(x->first(x), diann_r[!,:SpeciesNames])
     diann_r[!,:Condition] = map(x->getCondition(x, run_to_condition), diann_r[!,:Run])
-    diann_r[!,:Experiment] = map(x->getExperiment(x, condition_to_experiment), diann_r[!,:Condition])
+    #diann_r[!,:Experiment] = map(x->getExperiment(x, condition_to_experiment), diann_r[!,:Condition])
+
+
+    diann_r[!,:Experiment] .= ""
+    for i in range(1, size(diann_r, 1))
+            diann_r[i,:Experiment] = getExperiment(diann_r[i,:Condition], condition_to_experiment)
+    end
+    filter!(x->x.Experiment.!="", diann_r)
 
     columns_order = [
     :Run,:Condition,:Experiment,:Species,

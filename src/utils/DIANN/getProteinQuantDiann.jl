@@ -35,7 +35,7 @@ function getProteinQuantDIANN(
     min_precursors_per_protein::Integer = 2)
 
     #proteinGroupCols = Symbol.(["Condition","Biological","Technical","Species","Protein.Group", "Protein.Ids","Protein.Names","Genes","PG.Normalised","PG.MaxLFQ","PG.Q.Value"])
-
+    println("urmom")
     proteinGroupCols = [:Run,:Condition,:Experiment,:Species,:StrippedSequence,:PrecursorQuantity,:QValue,:ProteinGroup,:ProteinIds,:ProteinNames,:PGNormalised,:PGMaxLFQ,:PGQValue]
     diann_pg = copy(diann_df[!,proteinGroupCols])
     ###########
@@ -55,18 +55,21 @@ function getProteinQuantDIANN(
     #Retain only one row per protein group per run 
     getPrecursorsPerProtein!(diann_pg,
     [:Run,:ProteinGroup])
-
+    println("min_precursors_per_protein $min_precursors_per_protein")
     #Remove protein groups identified based on fewer than a given number of precursors
+    println("size(diann_pg) ", size(diann_pg))
     filter!(x->x.n_precursors>=min_precursors_per_protein, diann_pg)
     #Remove precursor count column 
-    select!(diann_pg, Not([:n_precursors]))
+    #select!(diann_pg, Not([:n_precursors]))
 
     #Filter based on protein group q value
+    println("size(diann_pg) ", size(diann_pg))
     filter!(x->x.PGQValue<=max_pg_q_val, diann_pg)
     #println("TEST")
     #Filter based on presence/absence of protein group quantitation
+    println("size(diann_pg) ", size(diann_pg))
     filter!(x->!iszero(x.PGMaxLFQ), diann_pg)
-
+    println("size(diann_pg) ", size(diann_pg))
     return diann_pg
 end
 

@@ -1,15 +1,15 @@
 function summarizeProteinGroupCondition(
-        condition_df::SubDataFrame
+        condition_df::AbstractDataFrame
     )
     summarizeProteinGroupCondition(
         condition_df[!,:PGMaxLFQ],
-        condition_df[!,:PGQValue]
+        condition_df[!,:PGQValue],
     )
 end
 
 function summarizeProteinGroupCondition(
         PGMaxLFQ::AbstractVector{Float32},
-        PGQValue::AbstractVector{Float32}
+        PGQValue::AbstractVector{Float32},
     )::@NamedTuple{mean::Float32, CV::Float32, std::Float32, var::Float32, n::UInt8, max_qval::Float32}
     _mean_, _std_, _n_ =  mean(PGMaxLFQ),std(PGMaxLFQ),length(PGMaxLFQ)
     return (
