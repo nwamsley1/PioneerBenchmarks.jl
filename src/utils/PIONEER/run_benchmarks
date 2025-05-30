@@ -39,3 +39,4 @@ threeProteomeAnalysis(
 
 
 base_path =  "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/ForPaper"
+fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/SPEC_LIBS/FASTA/"
