@@ -63,26 +63,16 @@ function summarizeExperiment(
     group_a, group_b = split(experiment, "vs")
     group_a = group_a[1:end-1]
     group_b = group_b[2:end]
-    println("experiment $experiment")
-    println("species_ratios $species_ratios")
-    println("group_a $group_a")
-    println("gropu_b $group_b")
-    println("groupby_cols $groupby_cols")
     CSV.write("/Users/n.t.wamsley/Desktop/experimenttest.csv", experiment_df)
     grouped_experiment_df = groupby(experiment_df, groupby_cols)
-    #println([size(x, 1) for x in grouped_experiment_df])
     exp_summary = combine(
         exp_group -> summarizeExperimentGroup(exp_group, group_a, group_b),
         grouped_experiment_df
     )
     CSV.write("/Users/n.t.wamsley/Desktop/tempdf.csv", exp_summary)
-    #println("exp_summary $exp_summary")
-    println("size(exp_summary) ", size(exp_summary))
     filter!(x->coalesce(x.min_n, -1)>=min_n, exp_summary)
     filter!(x->!ismissing(x.p_value), exp_summary)
-    println("size(exp_summary) ", size(exp_summary))
     exp_summary[!,:p_adj] = adjust(coalesce.(exp_summary[!,:p_value], 1.0f0), BenjaminiHochberg())
-    
     CSV.write(joinpath(out_dir, "tables", experiment*"_"*out_prefix*"_log2diff.csv"), exp_summary)
 
     plot_name = "Precursors"

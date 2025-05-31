@@ -1,3 +1,4 @@
+#=
 function getWeights(t::AbstractVector{T}, power::U, min_t::T) where {T,U<:AbstractFloat}
     #weight w_i should be w_i = 1/σ_i^2. 
     #emperically relationship between t and 
@@ -325,3 +326,4 @@ function BootstrapGDF(gdf::GroupedDataFrame{DataFrame},
     end
     return curves
 end
+=#

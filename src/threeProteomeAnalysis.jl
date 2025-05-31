@@ -5,6 +5,15 @@ function threeProteomeAnalysis(
     key_file_path::String,
     data_type::String,
     out_dir::String)
+
+    ########
+    #=
+    build output dir 
+    out-dir|
+            |-plots
+            |-tables
+            |-stats
+    =#
     if !isdir(out_dir)
         mkdir(out_dir)
     end
@@ -68,7 +77,6 @@ function threeProteomeAnalysis(
         throw("Unrecognized data type $data_type. Valid 
         options are ['diann', 'pioneer']")
     end
-        
     ##########
     #Precursor Summary 
     pr_condition_summary = combine(
@@ -76,20 +84,13 @@ function threeProteomeAnalysis(
         groupby(precursors_table,[:Experiment,:Condition,:Species,:PrecursorId])
     );
     species_order = Dict("HUMAN" => 1, "YEAST" => 2, "ECOLI" => 3)
-    #println("head pr_condition_summary: ", first(pr_condition_summary, 5))
-    #println("unique(pr_condition_summary.Species): ", unique(pr_condition_summary.Species))
     filter!(x->!occursin("CONTAMINANT", x.Species), pr_condition_summary)
     filter!(x->!occursin(";", x.Species), pr_condition_summary)
     filter!(x->!occursin("CONTAMINANT", x.Species), protein_groups_table)
     filter!(x->!occursin(";", x.Species), protein_groups_table)
-    println("protein_groups_table", first(protein_groups_table, 5))  
-    #println("unique(pr_condition_summary.Species): ", unique(pr_condition_summary.Species))
-    #return
     # Sort the DataFrame using the custom order
     sort!(pr_condition_summary, :Species, by = x -> species_order[x])
-    CSV.write("/Users/n.t.wamsley/Desktop/pr_condition.csv", pr_condition_summary)
     precursor_group_stats = combine(groupby(pr_condition_summary,:Experiment)) do experiment_df
-        println("size(experiment_df) ", size(experiment_df))
         summarizeExperiment(
                 out_dir,
                 "precursors",

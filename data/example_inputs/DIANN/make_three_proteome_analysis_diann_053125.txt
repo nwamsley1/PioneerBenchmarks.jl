@@ -1,0 +1,102 @@
+#######
+#= Instructions 
+Put DIANN results on desktop of pc. Use PioneerBenchmakrs module 
+=#
+fasta_dir = normpath("C:/Users/n.t.wamsley/Desktop/DIANN_SPEC_LIBS/FASTA")
+
+#########
+#Olsen Astral 
+pioneer_results_path = normpath("C:/Users/n.t.wamsley/Desktop/OlsenMixedSpeciesAstral200ng/
+report.parquet")
+key_file_path = normpath("C:/Users/n.t.wamsley/Desktop/OlsenMixedSpeciesAstral200ng/key.txt")
+run_to_condition_path = normpath("C:/Users/n.t.wamsley/Desktop/OlsenMixedSpeciesAstral200ng/    run_to_condition.txt")
+ 
+threeProteomeAnalysis(
+           pioneer_results_path,
+           fasta_dir,
+           run_to_condition_path,
+           key_file_path,
+           "diann",
+           normpath("C:/Users/n.t.wamsley/Desktop/OlsenMixedSpeciesAstral200ng/three_proteome")
+       )
+
+#########
+#MTAC Alternating 
+pioneer_results_path = normpath("C:/Users/n.t.wamsley/Desktop/MTAC_THREEPROTEOME/ALTERNATING/report.parquet")
+key_file_path = normpath("C:/Users/n.t.wamsley/Desktop/MTAC_THREEPROTEOME/ALTERNATING/key.txt")
+run_to_condition_path = normpath("C:/Users/n.t.wamsley/Desktop/MTAC_THREEPROTEOME/ALTERNATING/run_to_condition.txt")
+ 
+threeProteomeAnalysis(
+           pioneer_results_path,
+           fasta_dir,
+           run_to_condition_path,
+           key_file_path,
+           "diann",
+           normpath("C:/Users/n.t.wamsley/Desktop/MTAC_THREEPROTEOME/ALTERNATING/three_proteome")
+       )
+#########
+#MTAC Standard
+pioneer_results_path = normpath("C:/Users/n.t.wamsley/Desktop/MTAC_THREEPROTEOME/STANDARD/report.parquet")
+key_file_path = normpath("C:/Users/n.t.wamsley/Desktop/MTAC_THREEPROTEOME/STANDARD/key.txt")
+run_to_condition_path = normpath("C:/Users/n.t.wamsley/Desktop/MTAC_THREEPROTEOME/STANDARD/run_to_condition.txt")
+ 
+threeProteomeAnalysis(
+           pioneer_results_path,
+           fasta_dir,
+           run_to_condition_path,
+           key_file_path,
+           "diann",
+           normpath("C:/Users/n.t.wamsley/Desktop/MTAC_THREEPROTEOME/STANDARD/three_proteome")
+       )
+
+#########
+#Exploris 
+pioneer_results_path = normpath("C:/Users/n.t.wamsley/Desktop/OlsenMixedSpeciesExploris500ng/report.parquet")
+key_file_path = normpath("C:/Users/n.t.wamsley/Desktop/OlsenMixedSpeciesExploris500ng/key.txt")
+run_to_condition_path = normpath("C:/Users/n.t.wamsley/Desktop/OlsenMixedSpeciesExploris500ng/run_to_condition.txt")
+ 
+threeProteomeAnalysis(
+           pioneer_results_path,
+           fasta_dir,
+           run_to_condition_path,
+           key_file_path,
+           "diann",
+           normpath("C:/Users/n.t.wamsley/Desktop/OlsenMixedSpeciesExploris500ng/three_proteome")
+       )
+
+########
+#SCIEX
+pioneer_results_path = normpath("C:/Users/n.t.wamsley/Desktop/SciexNSWATH4/report.parquet")
+run_to_condition_path = normpath("C:/Users/n.t.wamsley/Desktop/SciexNSWATH4/run_to_condition.txt")
+
+
+key_file_path = normpath("C:/Users/n.t.wamsley/Desktop/SciexNSWATH4/key_AB.txt") 
+threeProteomeAnalysis(
+           pioneer_results_path,
+           fasta_dir,
+           run_to_condition_path,
+           key_file_path,
+           "diann",
+           normpath("C:/Users/n.t.wamsley/Desktop/SciexNSWATH4/three_proteome_AB")
+       )
+
+key_file_path = normpath("C:/Users/n.t.wamsley/Desktop/SciexNSWATH4/key_AC.txt") 
+threeProteomeAnalysis(
+           pioneer_results_path,
+           fasta_dir,
+           run_to_condition_path,
+           key_file_path,
+           "diann",
+           normpath("C:/Users/n.t.wamsley/Desktop/SciexNSWATH4/three_proteome_AC")
+       )
+
+key_file_path = normpath("C:/Users/n.t.wamsley/Desktop/SciexNSWATH4/key_BC.txt") 
+threeProteomeAnalysis(
+           pioneer_results_path,
+           fasta_dir,
+           run_to_condition_path,
+           key_file_path,
+           "diann",
+           normpath("C:/Users/n.t.wamsley/Desktop/SciexNSWATH4/three_proteome_BC")
+       )
+

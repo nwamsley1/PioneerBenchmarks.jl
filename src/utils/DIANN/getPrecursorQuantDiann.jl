@@ -26,7 +26,7 @@ function getPrecursorQuantDIANN(
 
     #proteinGroupCols = Symbol.(["Condition","Biological","Technical","Species","Protein.Group", "Protein.Ids","Protein.Names","Genes","PG.Normalised","PG.MaxLFQ","PG.Q.Value"])
 
-    precursorCols = [:Run,:Condition,:Experiment,:Species,:PrecursorId,:ModifiedSequence,:StrippedSequence,:PrecursorQuantity,:PrecursorCharge,:QValue]
+    precursorCols = [:Run,:Condition,:Experiment,:Species,:PrecursorId,:ModifiedSequence,:StrippedSequence,:PrecursorQuantity,:PrecursorCharge,:QValue,:LibQValue]
     diann_pr = copy(diann_df[!,precursorCols])
     ###########
     #Filter Rows 
@@ -38,6 +38,7 @@ function getPrecursorQuantDIANN(
     select!(diann_pr, Not([:SequenceLength]))
     #Remove rows not passing the q-value threshold or with no quantitation
     filter!(x->x.QValue<=max_precursor_q_val, diann_pr)
+    filter!(x->x.LibQValue<=max_precursor_q_val, diann_pr)
     filter!(x->!iszero(x.PrecursorQuantity), diann_pr)
 
     #Remove rows with forbidden variable modifications

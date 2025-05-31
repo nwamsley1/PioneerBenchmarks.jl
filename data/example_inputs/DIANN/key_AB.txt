@@ -1,0 +1,4 @@
+#condition keys
+A,B,C
+#condition pairs
+A,B,ECOLI;4.0|HUMAN;1.0|YEAST;0.5

@@ -17,9 +17,8 @@ function checkAndFilterDiannColumns(
     required_cols = [
         "Run",
         "Precursor.Id","Modified.Sequence","Stripped.Sequence","Precursor.Charge",
-        "Precursor.Quantity","Precursor.Normalised","Q.Value",
-        "Protein.Ids","Protein.Group","Protein.Names",
-        "PG.Normalised","PG.MaxLFQ","PG.Q.Value"]
+        "Precursor.Quantity","Precursor.Normalised","Q.Value","Lib.Q.Value",
+        "Protein.Ids","Protein.Group","Protein.Names","PG.MaxLFQ","PG.Q.Value","Lib.PG.Q.Value"]
 
     cols_in_df = Set(names(diann_df))
     missing_columns = setdiff(Set(required_cols), cols_in_df)
@@ -63,7 +62,6 @@ function LoadDiannResults(
         ds = Dataset(diann_results_path)
         diann_r = DataFrame(ds; copycols=true);
     end
-    println("Checking and filtering columns...")
     diann_r = checkAndFilterDiannColumns(diann_r)
     println("Getting Accesion ID to Species Map From Fastas...")
     @time begin
@@ -87,8 +85,8 @@ function LoadDiannResults(
 
     columns_order = [
     :Run,:Condition,:Experiment,:Species,
-    :PrecursorId,:ModifiedSequence,:StrippedSequence,:PrecursorCharge,:PrecursorQuantity,:PrecursorNormalised,:QValue,
-    :ProteinIds,:ProteinGroup,:ProteinNames,:PGNormalised,:PGMaxLFQ,:PGQValue]
+    :PrecursorId,:ModifiedSequence,:StrippedSequence,:PrecursorCharge,:PrecursorQuantity,:PrecursorNormalised,:QValue,:LibQValue,
+    :ProteinIds,:ProteinGroup,:ProteinNames,:PGMaxLFQ,:PGQValue,:LibPGQValue]
 
     return diann_r[!,columns_order]
 end
@@ -114,7 +112,7 @@ function LoadDiannResultsMMCC(
     columns_order = [
     :Run,:Condition,
     :PrecursorId,:ModifiedSequence,:StrippedSequence,:PrecursorCharge,:PrecursorQuantity,:PrecursorNormalised,:QValue,
-    :ProteinIds,:ProteinGroup,:ProteinNames,:PGNormalised,:PGMaxLFQ,:PGQValue]
+    :ProteinIds,:ProteinGroup,:ProteinNames,:PGMaxLFQ,:PGQValue]
 
     return diann_r[!,columns_order]
 end

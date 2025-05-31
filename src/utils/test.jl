@@ -1,3 +1,4 @@
+#=
 diann_results_path = "/Users/n.t.wamsley/Desktop/DIANN_EXPLORIS/OlsenMixedSpeciesExploris500ngReportNoNorm.parquet"
 fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/SPEC_LIBS/FASTA/"
 key_file_path = "/Users/n.t.wamsley/Desktop/astral_test_key_080324.txt"
@@ -285,3 +286,4 @@ threeProteomeAnalysis(
     "pioneer",
     "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/PIONEER_ANALYSES/Jan01_2025_SEARCH_NoQuadFit/three_proteome"
 )
+=#

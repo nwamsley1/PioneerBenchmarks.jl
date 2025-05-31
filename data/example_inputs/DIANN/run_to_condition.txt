@@ -1,0 +1,9 @@
+BenchSampleA_nswath4_Rep1.wiff,A
+BenchSampleA_nswath4_Rep2.wiff,A
+BenchSampleA_nswath4_Rep3.wiff,A
+BenchSampleB_nswath4_Rep1.wiff,B
+BenchSampleB_nswath4_Rep2.wiff,B
+BenchSampleB_nswath4_Rep3.wiff,B
+BenchSampleC_nswath4_Rep1.wiff,C
+BenchSampleC_nswath4_Rep2.wiff,C
+BenchSampleC_nswath4_Rep3.wiff,C

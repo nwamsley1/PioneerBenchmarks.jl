@@ -40,8 +40,6 @@ function getPrecursorQuantPioneer(
     select!(pioneer_pr, [:file_name,:species,:modified_sequence,:peak_area])
     rename!(pioneer_pr, [:file_name,:species,:modified_sequence,:peak_area] .=> [:Run, :Species, :PrecursorId,:PrecursorQuantity])
     #Parse file names to get the condition and experimemnt for each precursor id 
-    println("run_to_condition $run_to_condition")
-    println("condition_to_experiment $condition_to_experiment")
     pioneer_pr[!,:Condition] = [run_to_condition[run_name] for run_name in pioneer_pr[!,:Run]]
     pioneer_pr[!,:Experiment] .= ""
     for i in range(1, size(pioneer_pr, 1))
