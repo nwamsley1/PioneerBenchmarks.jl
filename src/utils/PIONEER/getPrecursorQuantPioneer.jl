@@ -40,9 +40,16 @@ function getPrecursorQuantPioneer(
     select!(pioneer_pr, [:file_name,:species,:modified_sequence,:peak_area])
     rename!(pioneer_pr, [:file_name,:species,:modified_sequence,:peak_area] .=> [:Run, :Species, :PrecursorId,:PrecursorQuantity])
     #Parse file names to get the condition and experimemnt for each precursor id 
-    println("run_to_condition $run_to_condition")
     pioneer_pr[!,:Condition] = [run_to_condition[run_name] for run_name in pioneer_pr[!,:Run]]
-    pioneer_pr[!,:Experiment] = [condition_to_experiment[condition] for condition in pioneer_pr[!,:Condition]]
+    pioneer_pr[!,:Experiment] .= ""
+    for i in range(1, size(pioneer_pr, 1))
+        if haskey(condition_to_experiment, pioneer_pr[i,:Condition])
+            exp = condition_to_experiment[pioneer_pr[i,:Condition]]
+            pioneer_pr[i,:Experiment] = exp
+        end
+    end
+    filter!(x->x.Experiment.!="", pioneer_pr)
+    #pioneer_pr[!,:Experiment] = [condition_to_experiment[condition] for condition in pioneer_pr[!,:Condition]]
     #QValue already filtered at 1% by Pioneer. Add columns to harmonize with diann output 
     pioneer_pr[!,:QValue] .= zero(Float32)
     #filter!(x->x.Run!="E5H50Y45_3",pioneer_pr)

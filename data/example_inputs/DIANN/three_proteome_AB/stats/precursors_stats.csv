@@ -1,0 +1,4 @@
+Experiment,Species,total,expected_log2fc,median_log2fc,log2fc_bias,log2fc_std,iqr_outliers_at_cv20,cv20,p_adj_05,p_adj_05_at_fc_threshold
+A_vs_B,ECOLI,2573,2.0,1.8813076,-0.1186924,0.3187557,85,1485,2343,2342
+A_vs_B,HUMAN,52953,0.0,-0.08211899,-0.08211899,0.22546135,1413,26804,352,117
+A_vs_B,YEAST,13027,-1.0,-1.0301704,-0.03017044,0.24136353,358,6835,8418,8402

@@ -1,3 +1,4 @@
+#=
 #Uniform Cubic Smoothing Spline
 #Given number of evenly spaced control points and data (time, value)
 #solve coefficients for B-spline basis. Then build a speedy implementation. 
@@ -261,3 +262,4 @@ function (s::UniformSpline)(t::U) where {U<:AbstractFloat}
     x += s.coeffs[coeff]*c
     return x
 end
+=#

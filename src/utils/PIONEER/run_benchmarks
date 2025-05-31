@@ -1,0 +1,42 @@
+pioneer_results_path = "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/SCIEX_NSWATH4/Jan01_2025_FitQuad_score6"
+fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/SPEC_LIBS/FASTA/"
+key_file_path = "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/SCIEX_NSWATH4/Jan01_2025_FitQuad_score6/key_AB.txt"
+run_to_condition_path = "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/SCIEX_NSWATH4/Jan01_2025_FitQuad_score6/run_to_condition.txt"
+threeProteomeAnalysis(
+    pioneer_results_path,
+    fasta_dir,
+    run_to_condition_path,
+    key_file_path,
+    "pioneer",
+    "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/SCIEX_NSWATH4/Jan01_2025_FitQuad_score6/three_proteome_AB"
+)
+
+pioneer_results_path = "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/SCIEX_NSWATH4/Jan01_2025_FitQuad_score6"
+fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/SPEC_LIBS/FASTA/"
+key_file_path = "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/SCIEX_NSWATH4/Jan01_2025_FitQuad_score6/key_AC.txt"
+run_to_condition_path = "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/SCIEX_NSWATH4/Jan01_2025_FitQuad_score6/run_to_condition.txt"
+threeProteomeAnalysis(
+    pioneer_results_path,
+    fasta_dir,
+    run_to_condition_path,
+    key_file_path,
+    "pioneer",
+    "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/SCIEX_NSWATH4/Jan01_2025_FitQuad_score6/three_proteome_AC"
+)
+
+pioneer_results_path = "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/SCIEX_NSWATH4/Jan01_2025_FitQuad_score6"
+fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/SPEC_LIBS/FASTA/"
+key_file_path = "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/SCIEX_NSWATH4/Jan01_2025_FitQuad_score6/key_BC.txt"
+run_to_condition_path = "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/SCIEX_NSWATH4/Jan01_2025_FitQuad_score6/run_to_condition.txt"
+threeProteomeAnalysis(
+    pioneer_results_path,
+    fasta_dir,
+    run_to_condition_path,
+    key_file_path,
+    "pioneer",
+    "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/SCIEX_NSWATH4/Jan01_2025_FitQuad_score6/three_proteome_BC"
+)
+
+
+base_path =  "/Volumes/d.goldfarb/Active/RIS_Goldfarb_Lab/NTW/PIONEER/PIONEER_PAPER/ANALYSES_PIONEER/ForPaper"
+fasta_dir = "/Users/n.t.wamsley/RIS_temp/PIONEER_PAPER/SPEC_LIBS/FASTA/"

@@ -17,9 +17,8 @@ function checkAndFilterDiannColumns(
     required_cols = [
         "Run",
         "Precursor.Id","Modified.Sequence","Stripped.Sequence","Precursor.Charge",
-        "Precursor.Quantity","Precursor.Normalised","Q.Value",
-        "Protein.Ids","Protein.Group","Protein.Names",
-        "PG.Normalised","PG.MaxLFQ","PG.Q.Value"]
+        "Precursor.Quantity","Precursor.Normalised","Q.Value","Lib.Q.Value",
+        "Protein.Ids","Protein.Group","Protein.Names","PG.MaxLFQ","PG.Q.Value","Lib.PG.Q.Value"]
 
     cols_in_df = Set(names(diann_df))
     missing_columns = setdiff(Set(required_cols), cols_in_df)
@@ -40,7 +39,11 @@ end
 function getExperiment(
     condition::String,
     condition_to_experiment::Dict{String, String})
-    return condition_to_experiment[condition]
+    if haskey(condition_to_experiment, condition)
+        return condition_to_experiment[condition]
+    else
+        return ""
+    end
 end
 
 
@@ -59,7 +62,6 @@ function LoadDiannResults(
         ds = Dataset(diann_results_path)
         diann_r = DataFrame(ds; copycols=true);
     end
-    println("Checking and filtering columns...")
     diann_r = checkAndFilterDiannColumns(diann_r)
     println("Getting Accesion ID to Species Map From Fastas...")
     @time begin
@@ -72,12 +74,19 @@ function LoadDiannResults(
     #Get the species to which each entry belongs 
     diann_r[!,:Species] = map(x->first(x), diann_r[!,:SpeciesNames])
     diann_r[!,:Condition] = map(x->getCondition(x, run_to_condition), diann_r[!,:Run])
-    diann_r[!,:Experiment] = map(x->getExperiment(x, condition_to_experiment), diann_r[!,:Condition])
+    #diann_r[!,:Experiment] = map(x->getExperiment(x, condition_to_experiment), diann_r[!,:Condition])
+
+
+    diann_r[!,:Experiment] .= ""
+    for i in range(1, size(diann_r, 1))
+            diann_r[i,:Experiment] = getExperiment(diann_r[i,:Condition], condition_to_experiment)
+    end
+    filter!(x->x.Experiment.!="", diann_r)
 
     columns_order = [
     :Run,:Condition,:Experiment,:Species,
-    :PrecursorId,:ModifiedSequence,:StrippedSequence,:PrecursorCharge,:PrecursorQuantity,:PrecursorNormalised,:QValue,
-    :ProteinIds,:ProteinGroup,:ProteinNames,:PGNormalised,:PGMaxLFQ,:PGQValue]
+    :PrecursorId,:ModifiedSequence,:StrippedSequence,:PrecursorCharge,:PrecursorQuantity,:PrecursorNormalised,:QValue,:LibQValue,
+    :ProteinIds,:ProteinGroup,:ProteinNames,:PGMaxLFQ,:PGQValue,:LibPGQValue]
 
     return diann_r[!,columns_order]
 end
@@ -103,7 +112,7 @@ function LoadDiannResultsMMCC(
     columns_order = [
     :Run,:Condition,
     :PrecursorId,:ModifiedSequence,:StrippedSequence,:PrecursorCharge,:PrecursorQuantity,:PrecursorNormalised,:QValue,
-    :ProteinIds,:ProteinGroup,:ProteinNames,:PGNormalised,:PGMaxLFQ,:PGQValue]
+    :ProteinIds,:ProteinGroup,:ProteinNames,:PGMaxLFQ,:PGQValue]
 
     return diann_r[!,columns_order]
 end

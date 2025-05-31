@@ -5,6 +5,15 @@ function threeProteomeAnalysis(
     key_file_path::String,
     data_type::String,
     out_dir::String)
+
+    ########
+    #=
+    build output dir 
+    out-dir|
+            |-plots
+            |-tables
+            |-stats
+    =#
     if !isdir(out_dir)
         mkdir(out_dir)
     end
@@ -68,7 +77,6 @@ function threeProteomeAnalysis(
         throw("Unrecognized data type $data_type. Valid 
         options are ['diann', 'pioneer']")
     end
-        
     ##########
     #Precursor Summary 
     pr_condition_summary = combine(
@@ -76,6 +84,10 @@ function threeProteomeAnalysis(
         groupby(precursors_table,[:Experiment,:Condition,:Species,:PrecursorId])
     );
     species_order = Dict("HUMAN" => 1, "YEAST" => 2, "ECOLI" => 3)
+    filter!(x->!occursin("CONTAMINANT", x.Species), pr_condition_summary)
+    filter!(x->!occursin(";", x.Species), pr_condition_summary)
+    filter!(x->!occursin("CONTAMINANT", x.Species), protein_groups_table)
+    filter!(x->!occursin(";", x.Species), protein_groups_table)
     # Sort the DataFrame using the custom order
     sort!(pr_condition_summary, :Species, by = x -> species_order[x])
     precursor_group_stats = combine(groupby(pr_condition_summary,:Experiment)) do experiment_df
@@ -95,6 +107,8 @@ function threeProteomeAnalysis(
 
     ##########
     #Protein Groups Summary
+    CSV.write(joinpath(out_dir, "stats", "protein_groups_table.csv"), protein_groups_table)
+
     pg_condition_summary = combine(
         condition->summarizeProteinGroupCondition(condition),    
         groupby(protein_groups_table,[:Experiment,:Condition,:Species,:ProteinGroup])

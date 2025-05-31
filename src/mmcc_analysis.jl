@@ -1,3 +1,4 @@
+#=
 function mmccAnalysis()
     run_to_condition = Dict(
         "20210906_LRH_MMCC_Static_A_1.raw"=>"A",
@@ -75,3 +76,4 @@ function mmccAnalysis()
     )
     return protein_group_curves, precursor_curves
 end
+=#
